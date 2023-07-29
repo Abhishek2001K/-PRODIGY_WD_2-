@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>To-Do List Application</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+    body {
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+h1 {
+  text-align: center;
+}
+
+input[type="text"] {
+  width: 70%;
+  padding: 8px;
+  margin-right: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #4CAF50;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin: 5px 0;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+li input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: #888;
+}
+
+#taskCount {
+  text-align: center;
+  font-weight: bold;
+}
+
+</style>
+<body>
+  <div class="container">
+    <h1>To-Do List</h1>
+    <div class="input-section">
+      <input type="text" id="newTaskInput" placeholder="Add a new task...">
+      <button onclick="addTask()">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+    <p id="taskCount"></p>
+  </div>
+  <script>
+// Function to add a new task to the list
+function addTask() {
+  const newTaskInput = document.getElementById("newTaskInput");
+  const taskText = newTaskInput.value.trim();
+
+  if (taskText !== "") {
+    const taskList = document.getElementById("taskList");
+    const newTask = document.createElement("li");
+    newTask.innerHTML = `<input type="checkbox" onchange="markCompleted(this)"> ${taskText} <button onclick="deleteTask(this)">Delete</button>`;
+    taskList.appendChild(newTask);
+
+    newTaskInput.value = "";
+    updateTaskCount();
+    saveTasksToLocalStorage();
+  }
+}
+
+// Function to mark a task as completed
+function markCompleted(checkbox) {
+  const taskText = checkbox.nextSibling;
+  if (checkbox.checked) {
+    taskText.classList.add("completed");
+  } else {
+    taskText.classList.remove("completed");
+  }
+  updateTaskCount();
+  saveTasksToLocalStorage();
+}
+
+// Function to delete a task
+function deleteTask(deleteButton) {
+  const taskItem = deleteButton.parentElement;
+  taskItem.remove();
+  updateTaskCount();
+  saveTasksToLocalStorage();
+}
+
+// Function to update the task count
+function updateTaskCount() {
+  const totalTasks = document.querySelectorAll("li").length;
+  const completedTasks = document.querySelectorAll("input[type='checkbox']:checked").length;
+  const remainingTasks = totalTasks - completedTasks;
+  const taskCountElement = document.getElementById("taskCount");
+  taskCountElement.textContent = `Remaining tasks: ${remainingTasks}`;
+}
+
+// Function to load saved tasks from local storage
+function loadTasksFromLocalStorage() {
+  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  const taskList = document.getElementById("taskList");
+
+  tasks.forEach((task) => {
+    const newTask = document.createElement("li");
+    newTask.innerHTML = `<input type="checkbox" onchange="markCompleted(this)" ${task.completed ? "checked" : ""}> ${task.text} <button onclick="deleteTask(this)">Delete</button>`;
+    taskList.appendChild(newTask);
+  });
+
+  updateTaskCount();
+}
+
+// Function to save tasks to local storage
+function saveTasksToLocalStorage() {
+  const tasks = [];
+  const taskItems = document.querySelectorAll("li");
+
+  taskItems.forEach((taskItem) => {
+    const taskText = taskItem.textContent.trim();
+    const isCompleted = taskItem.querySelector("input[type='checkbox']").checked;
+    tasks.push({ text: taskText, completed: isCompleted });
+  });
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+// Load saved tasks from local storage when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  loadTasksFromLocalStorage();
+});
+
+  </script>
+</body>
+</html>
